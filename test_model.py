@@ -7,6 +7,7 @@ from models import resnet
 import utils
 import os
 import sys
+import cv2
 
 # process command arguments
 phone, dped_dir, test_subset, iteration, resolution, use_gpu = utils.process_test_model_args(sys.argv)
@@ -29,7 +30,8 @@ enhanced = resnet(x_image)
 
 with tf.Session(config=config) as sess:
 
-    test_dir = dped_dir + phone.replace("_orig", "") + "/test_data/full_size_test_images/"
+    # test_dir = dped_dir + phone.replace("_orig", "") + "/test_data/full_size_test_images/"
+    test_dir = '/home/woodylin/dataset/BDD/day_night_separate/val/night/'
     test_photos = [f for f in os.listdir(test_dir) if os.path.isfile(test_dir + f)]
 
     if test_subset == "small":
@@ -56,14 +58,14 @@ with tf.Session(config=config) as sess:
 
             enhanced_2d = sess.run(enhanced, feed_dict={x_: image_crop_2d})
             enhanced_image = np.reshape(enhanced_2d, [IMAGE_HEIGHT, IMAGE_WIDTH, 3])
-
-            before_after = np.hstack((image_crop, enhanced_image))
+            enhanced_image = cv2.resize(enhanced_image, (1280, 720))
+            # before_after = np.hstack((image_crop, enhanced_image))
             photo_name = photo.rsplit(".", 1)[0]
 
             # save the results as .png images
 
             misc.imsave("visual_results/" + phone + "_" + photo_name + "_enhanced.png", enhanced_image)
-            misc.imsave("visual_results/" + phone + "_" + photo_name + "_before_after.png", before_after)
+            # misc.imsave("visual_results/" + phone + "_" + photo_name + "_before_after.png", before_after)
 
     else:
 
